@@ -31,9 +31,6 @@ func WriteFile(outfh, infh *os.File) error {
 	if err != nil {
 		return err
 	}
-	if fileSize == 0 {
-		return fmt.Errorf("input file must be at least 1 byte in size")
-	}
 	filename = strings.ToUpper(filename)
 	if !filenameSatisfiesISOConstraints(filename) {
 		return fmt.Errorf("Input file name %s does not satisfy the ISO9660 character set constraints", filename)
@@ -51,9 +48,6 @@ func WriteFile(outfh, infh *os.File) error {
 // WriteBuffer writes the contents of buf to an iso at outfh with the name provided
 func WriteBuffer(outfh io.Writer, buf []byte, filename string) error {
 	fileSize := uint32(len(buf))
-	if fileSize == 0 {
-		return fmt.Errorf("input buffer must be at least 1 byte in size")
-	}
 	r := bytes.NewReader(buf)
 
 	// reserved sectors
