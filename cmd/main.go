@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/rneugeba/iso9660wrap"
+	"github.com/rn/iso9660wrap"
 )
 
 func printUsage() {
