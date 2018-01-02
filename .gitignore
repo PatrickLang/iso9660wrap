@@ -1,1 +1,3 @@
 /build/iso9660wrap
+*.iso
+*.exe
