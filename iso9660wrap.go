@@ -97,8 +97,13 @@ func WriteFiles(outfile string, infiles []string) error {
 	writeVolumeDescriptorSetTerminator(w)
 	writePathTable(w, binary.LittleEndian)
 	writePathTable(w, binary.BigEndian)
+	writeRootDirectoryRecord(w)
 	
+	// In a full implementation, this should be a recursive strategy following directories & files,
+	// while checking max depth and concatenated path length limits. This is a simple implementation
+	// putting all files in the root.
 	for _, currentfile := range filelist {
+		// TODO writeFileHeader(w, currentfile.Size, currentfile.Filename)
 		writeData(w, currentfile.File, currentfile.Size, currentfile.Filename)
 	}
 	
@@ -146,8 +151,12 @@ func WriteBuffer(outfh io.Writer, buf []byte, filename string) error {
 		writeVolumeDescriptorSetTerminator(w)
 		writePathTable(w, binary.LittleEndian)
 		writePathTable(w, binary.BigEndian)
+		writeRootDirectoryRecord(w)
 		writeData(w, r, fileSize, filename)
-
+		if w.CurrentSector() != numTotalSectors(fileSize)-1 {
+			Panicf("internal error: unexpected last sector number (expected %d, actual %d)",
+					numTotalSectors(fileSize)-1, w.CurrentSector())
+		}
 		w.Finish()
 
 		err := bufw.Flush()
@@ -238,7 +247,7 @@ func writePathTable(w *ISO9660Writer, bo binary.ByteOrder) {
 	sw.PadWithZeros()
 }
 
-func writeData(w *ISO9660Writer, infh io.Reader, fileSize uint32, filename string) {
+func writeRootDirectoryRecord(w *ISO9660Writer) {
 	sw := w.NextSector()
 	if w.CurrentSector() != rootDirectorySectorNum {
 		Panicf("internal error: unexpected root directory sector %d", w.CurrentSector())
@@ -246,6 +255,13 @@ func writeData(w *ISO9660Writer, infh io.Reader, fileSize uint32, filename strin
 
 	WriteDirectoryRecord(sw, "\x00", w.CurrentSector())
 	WriteDirectoryRecord(sw, "\x01", rootDirectorySectorNum)
+}
+
+// Creates a single file record, then writes a file to it
+// TODO Should rename to writeFile which would be more accurate
+func writeData(w *ISO9660Writer, infh io.Reader, fileSize uint32, filename string) {
+	sw := w.NextSector()
+	startsector := w.CurrentSector()
 	WriteFileRecordHeader(sw, filename, w.CurrentSector()+1, fileSize)
 
 	// Now stream the data.  Note that the first buffer is never of SectorSize,
@@ -268,16 +284,18 @@ func writeData(w *ISO9660Writer, infh io.Reader, fileSize uint32, filename strin
 	}
 	if total != fileSize {
 		Panicf("input file size changed while the ISO file was being created (expected to read %d, read %d)", fileSize, total)
-	} else if w.CurrentSector() != numTotalSectors(fileSize)-1 {
+	} else if w.CurrentSector() != numDataSectors(fileSize)+startsector {
 		Panicf("internal error: unexpected last sector number (expected %d, actual %d)",
-			numTotalSectors(fileSize)-1, w.CurrentSector())
+			numDataSectors(fileSize)+startsector, w.CurrentSector())
 	}
 }
 
+func numDataSectors(fileSize uint32) uint32 {
+	return (fileSize + (SectorSize - 1)) / SectorSize
+}
+
 func numTotalSectors(fileSize uint32) uint32 {
-	var numDataSectors uint32
-	numDataSectors = (fileSize + (SectorSize - 1)) / SectorSize
-	return 1 + rootDirectorySectorNum + numDataSectors
+	return 1 + rootDirectorySectorNum + numDataSectors(fileSize)
 }
 
 func getInputFileSizeAndName(fh *os.File) (uint32, string, error) {
