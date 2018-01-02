@@ -78,10 +78,10 @@ func WriteFiles(outfile string, infiles []string) error {
 	}
 
 	// Open output file
-	outfh, err := os.OpenFile(outfile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
-	if err != nil {
-		return fmt.Errorf("could not open output file %s for writing: %s", outfile, err)
-	}
+	// outfh, err := os.OpenFile(outfile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
+	// if err != nil {
+	// 	return fmt.Errorf("could not open output file %s for writing: %s", outfile, err)
+	// }
 
 
 	// This is going to run all in ram, so don't make any huge ISO files yet
