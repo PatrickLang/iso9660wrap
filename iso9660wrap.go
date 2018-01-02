@@ -55,6 +55,7 @@ type FileEntry struct {
 func WriteFiles(outfile string, infiles []string) error {
 
 	filelist := []FileEntry{}
+	totalfilesize := uint32(0)
 
 	// Open all input files to check access, get size and validate filenames for ISO9660 compliance
 	for _, inFilename := range infiles {
@@ -75,6 +76,7 @@ func WriteFiles(outfile string, infiles []string) error {
 		}
 
 		filelist = append(filelist, FileEntry{inFileh, filename, fileSize})
+		totalfilesize = totalfilesize + fileSize
 	}
 
 	// Open output file
@@ -90,27 +92,25 @@ func WriteFiles(outfile string, infiles []string) error {
 
 	w := NewISO9660Writer(bufw)
 
-	// writePrimaryVolumeDescriptor(w, fileSize, filename)
-	// writeVolumeDescriptorSetTerminator(w)
-	// writePathTable(w, binary.LittleEndian)
-	// writePathTable(w, binary.BigEndian)
-	// writeData(w, r, fileSize, filename)
-
+	// TODO should totalfilesize include sector padding per file, path tables, file/directory descriptors, ...?
+	writePrimaryVolumeDescriptor(w, totalfilesize, "iso9660wrapped")
+	writeVolumeDescriptorSetTerminator(w)
+	writePathTable(w, binary.LittleEndian)
+	writePathTable(w, binary.BigEndian)
+	
+	for _, currentfile := range filelist {
+		writeData(w, currentfile.File, currentfile.Size, currentfile.Filename)
+	}
+	
 	w.Finish()
 
-	err := bufw.Flush()
+	err = bufw.Flush()
 	if err != nil {
 		panic(err)
 	}
-	// Iterate through files
-		// append to buffer
-		// take note of starting sector or byte
-		// pad to sector boundary
-
-
-	// how big is directory, is sector offset needed for files yet?
-
-	return fmt.Errorf("WriteFiles is still a work in progress")
+	
+	//return fmt.Errorf("WriteFiles is still a work in progress")
+	return nil
 }
 
 // WriteBuffer writes the contents of buf to an iso at outfh with the name provided
@@ -180,7 +180,7 @@ func writePrimaryVolumeDescriptor(w *ISO9660Writer, fileSize uint32, filename st
 	sw.WritePaddedString(filename, 32) // volume set identifier
 
 	sw.WriteZeros(8) // system identifier
-	sw.WriteBothEndianDWord(numTotalSectors(fileSize)) // volume size - TODO needs update for multi file?
+	sw.WriteBothEndianDWord(numTotalSectors(fileSize)) // volume size
 	sw.WriteZeros(32) 
 
 	sw.WriteBothEndianWord(1) // volume set size
