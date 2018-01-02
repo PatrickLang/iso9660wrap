@@ -56,7 +56,7 @@ func WriteFiles(outfile string, infiles []string) error {
 
 	filelist := []FileEntry{}
 
-	// Open all files to check access and validate filenames for ISO9660 compliance
+	// Open all input files to check access, get size and validate filenames for ISO9660 compliance
 	for _, inFilename := range infiles {
 		// Will canonicalize path, check access
 		inFileh, err := os.Open(inFilename)
@@ -76,6 +76,23 @@ func WriteFiles(outfile string, infiles []string) error {
 
 		filelist = append(filelist, FileEntry{inFileh, filename, fileSize})
 	}
+
+	// Open output file
+	outfh, err := os.OpenFile(outfile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
+	if err != nil {
+		return fmt.Errorf("could not open output file %s for writing: %s", outfile, err)
+	}
+
+
+	// This is going to run all in ram, so don't make any huge ISO files yet
+
+	// Iterate through files
+		// append to buffer
+		// take note of starting sector or byte
+		// pad to sector boundary
+
+
+	// how big is directory, is sector offset needed for files yet?
 
 	return fmt.Errorf("WriteFiles is still a work in progress")
 }
