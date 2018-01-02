@@ -45,9 +45,39 @@ func WriteFile(outfh, infh *os.File) error {
 	return WriteBuffer(outfh, buf, filename)
 }
 
+type FileEntry struct {
+	File *os.File
+	Filename string
+	Size uint32
+}
+
 // WriteFiles
 func WriteFiles(outfile string, infiles []string) error {
-	return nil;
+
+	filelist := []FileEntry{}
+
+	// Open all files to check access and validate filenames for ISO9660 compliance
+	for _, inFilename := range infiles {
+		// Will canonicalize path, check access
+		inFileh, err := os.Open(inFilename)
+		if err != nil {
+			return fmt.Errorf("could not open input file %s for reading: %s", inFilename, err)
+		}
+
+		fileSize, filename, err := getInputFileSizeAndName(inFileh)
+		if err != nil {
+			return err
+		}
+
+		filename = strings.ToUpper(filename)
+		if !filenameSatisfiesISOConstraints(filename) {
+			return fmt.Errorf("Input file name %s does not satisfy the ISO9660 character set constraints", filename)
+		}
+
+		filelist = append(filelist, FileEntry{inFileh, filename, fileSize})
+	}
+
+	return fmt.Errorf("WriteFiles is still a work in progress")
 }
 
 // WriteBuffer writes the contents of buf to an iso at outfh with the name provided
