@@ -184,17 +184,17 @@ func writePrimaryVolumeDescriptor(w *ISO9660Writer, fileSize uint32, filename st
 	sw.WriteString(volumeDescriptorSetMagic)
 	sw.WriteByte('\x00')
 
-	sw.WritePaddedString("", 32) // volume identifier
-	sw.WritePaddedString(filename, 32) // volume set identifier
+	sw.WritePaddedString("", 32) // system identifier
+	sw.WritePaddedString(filename, 32) // volume identifier
 
-	sw.WriteZeros(8) // system identifier
-	sw.WriteBothEndianDWord(numTotalSectors(fileSize)) // volume size
-	sw.WriteZeros(32) 
+	sw.WriteZeros(8) // unused
+	sw.WriteBothEndianDWord(numTotalSectors(fileSize)) // volume size in logical blocks
+	sw.WriteZeros(32) // unused
 
 	sw.WriteBothEndianWord(1) // volume set size
 	sw.WriteBothEndianWord(1) // volume sequence number
 	sw.WriteBothEndianWord(uint16(SectorSize)) // logical block size
-	sw.WriteBothEndianDWord(SectorSize) // path table length
+	sw.WriteBothEndianDWord(SectorSize) // path table length - BUG this could vary past a certain number of directories
 
 	sw.WriteLittleEndianDWord(littleEndianPathTableSectorNum)
 	sw.WriteLittleEndianDWord(0) // no secondary path tables
@@ -220,7 +220,7 @@ func writePrimaryVolumeDescriptor(w *ISO9660Writer, fileSize uint32, filename st
 	sw.WriteByte('\x01') // version
 	sw.WriteByte('\x00') // reserved
 
-	sw.PadWithZeros() // 512 (reserved for app) + 653 (zeros)
+	sw.PadWithZeros() // 512 (reserved for app) + 653 (future use)
 }
 
 func writeVolumeDescriptorSetTerminator(w *ISO9660Writer) {
