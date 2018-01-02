@@ -45,6 +45,11 @@ func WriteFile(outfh, infh *os.File) error {
 	return WriteBuffer(outfh, buf, filename)
 }
 
+// WriteFiles
+func WriteFiles(outfile string, infiles []string) error {
+	return nil;
+}
+
 // WriteBuffer writes the contents of buf to an iso at outfh with the name provided
 func WriteBuffer(outfh io.Writer, buf []byte, filename string) error {
 	fileSize := uint32(len(buf))

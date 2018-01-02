@@ -5,16 +5,24 @@ import (
 	"log"
 	"os"
 
-	"github.com/rn/iso9660wrap"
+	"github.com/PatrickLang/iso9660wrap"
 )
 
 func printUsage() {
 	fmt.Fprintf(os.Stderr, "usage: %s INFILE OUTFILE\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "usage: %s -o OUTFILE INFILE <INFILE2> <INFILE...>\n", os.Args[0])
 }
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--help" {
 		printUsage()
+		os.Exit(0)
+	} else if (len(os.Args) >= 3 && os.Args[1] == "-o") {
+		// this is okay
+		if err := iso9660wrap.WriteFiles(os.Args[2], os.Args[3:]) ; err != nil {
+			log.Fatalf("error: %s", err)
+			os.Exit(1)
+		}
 		os.Exit(0)
 	} else if len(os.Args) != 3 {
 		printUsage()
