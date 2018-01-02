@@ -97,7 +97,7 @@ func WriteFiles(outfile string, infiles []string) error {
 	writeVolumeDescriptorSetTerminator(w)
 	writePathTable(w, binary.LittleEndian) // TODO - does this need to change with multiple files? Don't think so for 1 directory
 	writePathTable(w, binary.BigEndian)
-	writeRootDirectoryRecord(w)
+	writeRootDirectoryRecord(w) writeRootDirectoryRecord(w) // TODO - Is this needed? Looks like root is in writePrimaryVolumeDescriptor?
 	
 	// In a full implementation, this should be a recursive strategy following directories & files,
 	// while checking max depth and concatenated path length limits. This is a simple implementation
@@ -150,7 +150,7 @@ func WriteBuffer(outfh io.Writer, buf []byte, filename string) error {
 		writeVolumeDescriptorSetTerminator(w)
 		writePathTable(w, binary.LittleEndian)
 		writePathTable(w, binary.BigEndian)
-		writeRootDirectoryRecord(w)
+		writeRootDirectoryRecord(w) // TODO - Is this needed? Looks like root is in writePrimaryVolumeDescriptor?
 		writeData(w, r, fileSize, filename)
 		if w.CurrentSector() != numTotalSectors(fileSize) {
 			Panicf("internal error: unexpected last sector number (expected %d, actual %d)",
