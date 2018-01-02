@@ -16,7 +16,7 @@ func Panicf(format string, v ...interface{}) {
 	panic(fmt.Errorf(format, v...))
 }
 
-const volumeDescriptorSetMagic = "\x43\x44\x30\x30\x31\x01"
+const volumeDescriptorSetMagic = "\x43\x44\x30\x30\x31\x01" // Identifier = CD001, Version 0x01
 
 const primaryVolumeSectorNum uint32 = 16
 const numVolumeSectors uint32 = 2 // primary + terminator
@@ -78,14 +78,30 @@ func WriteFiles(outfile string, infiles []string) error {
 	}
 
 	// Open output file
-	// outfh, err := os.OpenFile(outfile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
-	// if err != nil {
-	// 	return fmt.Errorf("could not open output file %s for writing: %s", outfile, err)
-	// }
+	outfh, err := os.OpenFile(outfile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
+	if err != nil {
+		return fmt.Errorf("could not open output file %s for writing: %s", outfile, err)
+	}
 
 
 	// This is going to run all in ram, so don't make any huge ISO files yet
 
+	bufw := bufio.NewWriter(outfh)
+
+	w := NewISO9660Writer(bufw)
+
+	// writePrimaryVolumeDescriptor(w, fileSize, filename)
+	// writeVolumeDescriptorSetTerminator(w)
+	// writePathTable(w, binary.LittleEndian)
+	// writePathTable(w, binary.BigEndian)
+	// writeData(w, r, fileSize, filename)
+
+	w.Finish()
+
+	err := bufw.Flush()
+	if err != nil {
+		panic(err)
+	}
 	// Iterate through files
 		// append to buffer
 		// take note of starting sector or byte
@@ -160,16 +176,16 @@ func writePrimaryVolumeDescriptor(w *ISO9660Writer, fileSize uint32, filename st
 	sw.WriteString(volumeDescriptorSetMagic)
 	sw.WriteByte('\x00')
 
-	sw.WritePaddedString("", 32)
-	sw.WritePaddedString(filename, 32)
+	sw.WritePaddedString("", 32) // volume identifier
+	sw.WritePaddedString(filename, 32) // volume set identifier
 
-	sw.WriteZeros(8)
-	sw.WriteBothEndianDWord(numTotalSectors(fileSize))
-	sw.WriteZeros(32)
+	sw.WriteZeros(8) // system identifier
+	sw.WriteBothEndianDWord(numTotalSectors(fileSize)) // volume size - TODO needs update for multi file?
+	sw.WriteZeros(32) 
 
 	sw.WriteBothEndianWord(1) // volume set size
 	sw.WriteBothEndianWord(1) // volume sequence number
-	sw.WriteBothEndianWord(uint16(SectorSize))
+	sw.WriteBothEndianWord(uint16(SectorSize)) // logical block size
 	sw.WriteBothEndianDWord(SectorSize) // path table length
 
 	sw.WriteLittleEndianDWord(littleEndianPathTableSectorNum)

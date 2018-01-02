@@ -21,3 +21,6 @@ Example run
 2018/01/01 21:55:04 error: WriteFiles is still a work in progress
 ```
 
+## References
+
+http://www.idea2ic.com/File_Formats/iso9660.pdf
