@@ -95,7 +95,7 @@ func WriteFiles(outfile string, infiles []string) error {
 	// TODO should totalfilesize include sector padding per file, path tables, file/directory descriptors, ...?
 	writePrimaryVolumeDescriptor(w, totalfilesize, "iso9660wrapped")
 	writeVolumeDescriptorSetTerminator(w)
-	writePathTable(w, binary.LittleEndian)
+	writePathTable(w, binary.LittleEndian) // TODO - does this need to change with multiple files? Don't think so for 1 directory
 	writePathTable(w, binary.BigEndian)
 	writeRootDirectoryRecord(w)
 	
@@ -103,7 +103,6 @@ func WriteFiles(outfile string, infiles []string) error {
 	// while checking max depth and concatenated path length limits. This is a simple implementation
 	// putting all files in the root.
 	for _, currentfile := range filelist {
-		// TODO writeFileHeader(w, currentfile.Size, currentfile.Filename)
 		writeData(w, currentfile.File, currentfile.Size, currentfile.Filename)
 	}
 	
@@ -255,6 +254,7 @@ func writeRootDirectoryRecord(w *ISO9660Writer) {
 
 	WriteDirectoryRecord(sw, "\x00", w.CurrentSector())
 	WriteDirectoryRecord(sw, "\x01", rootDirectorySectorNum)
+	// TODO - does this need to change with multiple files? probably
 }
 
 // Creates a single file record, then writes a file to it
