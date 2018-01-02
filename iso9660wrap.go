@@ -153,9 +153,9 @@ func WriteBuffer(outfh io.Writer, buf []byte, filename string) error {
 		writePathTable(w, binary.BigEndian)
 		writeRootDirectoryRecord(w)
 		writeData(w, r, fileSize, filename)
-		if w.CurrentSector() != numTotalSectors(fileSize)-1 {
+		if w.CurrentSector() != numTotalSectors(fileSize) {
 			Panicf("internal error: unexpected last sector number (expected %d, actual %d)",
-					numTotalSectors(fileSize)-1, w.CurrentSector())
+					numTotalSectors(fileSize), w.CurrentSector())
 		}
 		w.Finish()
 
