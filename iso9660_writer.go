@@ -126,6 +126,10 @@ func (w *ISO9660Writer) CurrentSector() uint32 {
 }
 
 func (w *ISO9660Writer) NextSector() *SectorWriter {
+	// buf := make([]byte, 600)
+	// runtime.Stack(buf, false)
+	// fmt.Printf("Sector %d used in \t\n%s\n", w.sectorNum, buf)
+
 	if w.sw.RemainingSpace() == SectorSize {
 		Panicf("internal error: tried to leave sector %d empty", w.sectorNum)
 	}

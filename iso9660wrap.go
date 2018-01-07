@@ -98,6 +98,14 @@ func WriteFiles(outfile string, infiles []string) error {
 
 	// This is going to run all in ram, so don't make any huge ISO files yet
 
+	// reserved sectors
+	reservedAreaLength := int64(16 * SectorSize)
+	_, err = outfh.Write(make([]byte, reservedAreaLength))
+	if err != nil {
+		return fmt.Errorf("could not write to output file: %s", err)
+	}
+
+	// writer for rest
 	bufw := bufio.NewWriter(outfh)
 
 	w := NewISO9660Writer(bufw)
