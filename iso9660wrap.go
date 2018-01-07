@@ -83,11 +83,11 @@ func WriteFiles(outfile string, infiles []string) error {
 	// Build a running list of lbas and total sizes used by files
 	totalfilesize := uint32(0)
 	currentlba := rootDirectorySectorNum + 1 // Would need to change if size of directory + file entries exceeds a sector
-	for _, currentfile := range filelist {
+	for i := range filelist {
 		// Update running total of filesizes and lbas used
-		totalfilesize = totalfilesize + currentfile.Size
-		currentfile.Lba = currentlba // BUG - this isn't sticking. need pointer?
-		currentlba = currentlba + numDataSectors(currentfile.Size)
+		totalfilesize = totalfilesize + filelist[i].Size
+		(&filelist[i]).Lba = currentlba
+		currentlba = currentlba + numDataSectors(filelist[i].Size)
 	}
 
 	// Open output file
