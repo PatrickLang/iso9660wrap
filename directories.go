@@ -1,8 +1,8 @@
 package iso9660wrap
 
 import (
-	"time"
 	"strings"
+	"time"
 )
 
 func WriteDirectoryRecord(w *SectorWriter, identifier string, firstSectorNum uint32) uint32 {
@@ -10,7 +10,7 @@ func WriteDirectoryRecord(w *SectorWriter, identifier string, firstSectorNum uin
 		Panicf("directory identifier length %d is out of bounds", len(identifier))
 	}
 
-	if strings.Count(identifier,".") > 0 {
+	if strings.Count(identifier, ".") > 0 {
 		Panicf("directory names cannot contain '.', %s is invalid", identifier)
 	}
 
@@ -36,12 +36,12 @@ func WriteDirectoryRecord(w *SectorWriter, identifier string, firstSectorNum uin
 }
 
 func WriteFileRecordHeader(w *SectorWriter, identifier string, firstSectorNum uint32, fileSize uint32) uint32 {
-	separatorcount := strings.Count(identifier,".")
-	
+	separatorcount := strings.Count(identifier, ".")
+
 	if separatorcount > 1 {
 		Panicf("file names can only have 0 or 1 '.', %s is invalid", identifier)
 	}
-	
+
 	if len(identifier) > 30 {
 		Panicf("file identifier length %d is out of bounds", len(identifier))
 	}
