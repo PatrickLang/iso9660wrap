@@ -21,6 +21,15 @@ Example run
 2018/01/01 21:55:04 error: WriteFiles is still a work in progress
 ```
 
+
+### Current work
+
+- [ ] Bug: Something is amiss in the file/directory records. Files are right length but all 0's in my implementation
+- [ ] Fix old syntax
+- [ ] Filename/directory entry sorting to spec
+- [ ] Eventually - multiple directories
+
+
 ## References
 
 http://www.idea2ic.com/File_Formats/iso9660.pdf
