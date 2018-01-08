@@ -25,7 +25,7 @@ Example run
 ### Current work
 
 - [x] Bug: Something is amiss in the file/directory records. Files are right length but all 0's in my implementation
-- [ ] Fix old syntax
+- [x] Fix old syntax
 - [ ] Filename/directory entry sorting to spec
 - [ ] Eventually - multiple directories
 
