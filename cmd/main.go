@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/rn/iso9660wrap"
+	"github.com/patricklang/iso9660wrap"
 )
 
 func printUsage() {
