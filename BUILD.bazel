@@ -14,5 +14,5 @@ go_library(
 go_binary(
     name = "iso9660wrap",
     srcs = ["cmd/main.go"],
-    embed = [":go_default_library"]
+    deps = [":go_default_library"]
 )
